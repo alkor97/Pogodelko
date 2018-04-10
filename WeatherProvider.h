@@ -6,8 +6,107 @@
 #include "Display.h"
 #include "QueryManager.h"
 
+namespace {
 const float ZERO_KELVIN = 273.15f;
 const float METER_PER_SECOND = 3.6f; // in km/s
+} // anonymous namespace
+
+class Weather {
+  public:
+    Weather()
+      : descriptionsCount(0)
+      , temperature(0.0f)
+      , humidity(0)
+      , pressure(0)
+      , windSpeed(0.0f)
+      , windDirection(0)
+      , cloudCoverage(0)
+    {}
+
+    void clear() {
+      descriptionsCount = 0;
+    }
+
+    bool addDescription(const String& description) {
+      if (descriptionsCount < 5) {
+        descriptions[descriptionsCount++] = description;
+        return true;
+      }
+      return false;
+    }
+
+    const String& getDescription(uint8_t index) const {
+      return descriptions[index];
+    }
+
+    uint8_t getDescriptionsCount() const {
+      return descriptionsCount;
+    }
+
+    // temperature in Celsius degrees
+    float getTemperature() const {
+      return temperature - ZERO_KELVIN;
+    }
+
+    void setTemperature(float v) {
+      temperature = v;
+    }
+
+    // humidity as a percentage
+    uint8_t getHumidity() const {
+      return humidity;
+    }
+
+    void setHumidity(uint8_t v) {
+      humidity = v;
+    }
+
+    // pressure in hPa
+    uint16_t getPressure() const {
+      return pressure;
+    }
+
+    void setPressure(uint16_t v) {
+      pressure = v;
+    }
+
+    // wind speed in km/h
+    float getWindSpeed() const {
+      return windSpeed * METER_PER_SECOND;
+    }
+
+    void setWindSpeed(float v) {
+      windSpeed = v;
+    }
+
+    // wind direction as azimuth (degrees 0-359)
+    uint16_t getWindDirection() const {
+      return windDirection;
+    }
+
+    void setWindDirection(uint16_t v) {
+      windDirection = v;
+    }
+
+    // cloud coverage as percentage
+    uint8_t getCloudCoverage() const {
+      return cloudCoverage;
+    }
+
+    void setCloudCoverage(uint8_t v) {
+      cloudCoverage = v;
+    }
+
+  private:
+    String descriptions[5];
+    uint8_t descriptionsCount;
+    float temperature; // in kelvins
+    uint8_t humidity; // as percentage
+    uint16_t pressure; // in hPa
+    float windSpeed; // in m/s
+    uint16_t windDirection; // azimuth
+    uint8_t cloudCoverage; // as percentage
+};
 
 class WeatherProvider : public QueryManager {
   public:
@@ -21,10 +120,10 @@ class WeatherProvider : public QueryManager {
       this->locationProvider = locationProvider;
     }
 
-    String getWeather() {
+    const Weather& getWeather() {
       if (!locationProvider) {
         Serial.println("Location provider not set");
-        return "";
+        return weather;
       }
 
       const Location location = locationProvider->getLocation();
@@ -56,46 +155,28 @@ class WeatherProvider : public QueryManager {
         DynamicJsonBuffer jsonBuffer(bufferSize);
         JsonObject& root = jsonBuffer.parseObject(response);
         if (root.success()) {
-          weather = "";
+          weather.clear();
           for (int i = 0; i < root["weather"].size(); ++i) {
-            if (i > 0)
-              weather += " * ";
             String w = root["weather"][i]["description"];
-            weather += w;
+            weather.addDescription(w);
           }
 
           float temperature = root["main"]["temp"];
-          weather += String(" * ");
-          weather += static_cast<int>(temperature - ZERO_KELVIN);
-          weather += String("C");
+          weather.setTemperature(temperature);
 
           int pressure = root["main"]["pressure"];
-          weather += String(" * ");
-          weather += pressure;
-          weather += String("hPa");
+          weather.setPressure(pressure);
 
           int humidity = root["main"]["humidity"];
-          weather += String(" * ");
-          weather += humidity;
-          weather += String("%");
+          weather.setHumidity(humidity);
 
           float windSpeed = root["wind"]["speed"];
+          weather.setWindSpeed(windSpeed);
           int windDeg = root["wind"]["deg"];
-          weather += " * ";
-          weather += String("wind ");
-          weather += windDirection(windDeg);
-          weather += String(" ");
-          weather += (int) (METER_PER_SECOND * windSpeed);
-          weather += String("km/h");
+          weather.setWindDirection(windDeg);
 
           int clouds = root["clouds"]["all"];
-          weather += " * ";
-          weather += "clouds ";
-          weather += clouds;
-          weather += "%";
-
-          Serial.print("Weather: ");
-          Serial.println(weather);
+          weather.setCloudCoverage(clouds);
 
           return true;
         } else {
@@ -110,44 +191,9 @@ class WeatherProvider : public QueryManager {
     }
 
   private:
-    String windDirection(int windDeg) {
-      if (windDeg < 22)
-        return "N";
-      if (windDeg < 45 + 22)
-        return "NE";
-      if (windDeg < 90 + 22)
-        return "E";
-      if (windDeg < 90 + 45 + 22)
-        return "SE";
-      if (windDeg < 180 + 22)
-        return "S";
-      if (windDeg < 180 + 45 + 22)
-        return "SW";
-      if (windDeg < 270 + 22)
-        return "W";
-      if (windDeg < 270 + 45 + 22)
-        return "NW";
-      return "N";
-    }
-
     const char* apiKey;
     GLocationProvider* locationProvider;
     Location lastLocation;
-    String weather;
-};
-
-class WeatherPresenter {
-  public:
-    void setup(Display& display, uint8_t y) {
-      scroller.setup(display, y);
-    }
-
-    void show(Display& display, WeatherProvider& weatherProvider) {
-      display.setTextSize(1);
-      scroller.setText(weatherProvider.getWeather());
-      scroller.show(display);
-    }
-  private:
-    Scroller scroller;
+    Weather weather;
 };
 

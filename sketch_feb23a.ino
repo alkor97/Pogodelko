@@ -7,6 +7,7 @@
 #include "Display.h"
 #include "LocationProvider.h"
 #include "WeatherProvider.h"
+#include "WeatherPresenter.h"
 #include "Private.h"
 
 Display display;
