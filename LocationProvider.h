@@ -1,5 +1,6 @@
 
 #pragma once
+
 #include <RestClient.h>
 #include "Display.h"
 #include "Scroller.h"
@@ -9,7 +10,7 @@
 struct Location {
   static const uint8_t MAX_DIGITS = 7;
 
-  Location(float latitude = 0.0f / 0.0f, float longitude = 0.0f / 0.0f)
+  Location(float latitude = 0.0f, float longitude = 0.0f)
     : latitude(latitude)
     , longitude(longitude)
   {}
@@ -66,11 +67,11 @@ class GLocationProvider : public QueryManager {
 
     bool queryCoordinates() {
       RestClient client("www.googleapis.com", 443, 1);
+      client.setContentType("application/x-www-form-urlencoded");
       String path = "/geolocation/v1/geolocate?key=";
       path += apiKey;
       String response;
-      String body;
-      int statusCode = client.post(path.c_str(), body.c_str(), &response);
+      int statusCode = client.post(path.c_str(), "", &response);
       if (statusCode == 200) {
         const size_t bufferSize = 2 * JSON_OBJECT_SIZE(2) + 70;
         DynamicJsonBuffer jsonBuffer(bufferSize);
