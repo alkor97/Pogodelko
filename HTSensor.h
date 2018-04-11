@@ -35,7 +35,7 @@ class HTSensor : public QueryManager {
       if (abs(lastTemperature - temperature) >= 0.1f) {
         Serial.print("Temperature: ");
         Serial.print(lastTemperature, 1);
-        Serial.println("C");
+        Serial.println('C');
       }
       temperature = lastTemperature;
 
@@ -43,7 +43,7 @@ class HTSensor : public QueryManager {
       if (abs(lastHumidity - humidity) >= 1.0f) {
         Serial.print("Humidity: ");
         Serial.print(lastHumidity, 0);
-        Serial.println("%");
+        Serial.println('%');
       }
       humidity = lastHumidity;
       return true;
@@ -84,7 +84,7 @@ class HTPresenter {
       display.setCursor(display.getCursorX() + 4, display.getCursorY());
 
       display.print(humidity);
-      display.print("%");
+      display.print('%');
     }
 
   private:

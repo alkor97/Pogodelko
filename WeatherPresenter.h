@@ -21,12 +21,12 @@ class WeatherPresenter {
       }
 
       text += " * ";
-      text += String(weather.getTemperature(), 0);
-      text += "C";
+      text += String(weather.getTemperature(), 0).trim();
+      text += 'C';
 
       text += " * ";
       text += weather.getHumidity();
-      text += "%";
+      text += '%';
 
       text += " * ";
       text += weather.getPressure();
@@ -35,15 +35,18 @@ class WeatherPresenter {
       text += " * ";
       text += "wind ";
       text += windDirection(weather.getWindDirection());
-      text += " ";
+      text += ' ';
       text += String(weather.getWindSpeed(), 0);
       text += "km/h";
 
       text += " * ";
       text += "clouds ";
       text += weather.getCloudCoverage();
-      text += "%";
-      
+      text += '%';
+
+      Serial.print("Weather: ");
+      Serial.println(text);
+
       scroller.setText(text);
       scroller.show(display);
     }

@@ -11,7 +11,6 @@ class QueryManager {
       , lastQueryTime(-queryPeriod)
     {}
 
-  protected:
     template <typename Q>
     void query(Q doQuery, bool force = false) {
       const long now = millis();
