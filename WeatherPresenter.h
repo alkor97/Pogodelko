@@ -20,8 +20,10 @@ class WeatherPresenter {
         text += weather.getDescription(i);
       }
 
+      String t(weather.getTemperature(), 0);
+      t.trim();
       text += " * ";
-      text += String(weather.getTemperature(), 0).trim();
+      text += t;
       text += 'C';
 
       text += " * ";
@@ -43,9 +45,6 @@ class WeatherPresenter {
       text += "clouds ";
       text += weather.getCloudCoverage();
       text += '%';
-
-      Serial.print("Weather: ");
-      Serial.println(text);
 
       scroller.setText(text);
       scroller.show(display);
@@ -70,6 +69,6 @@ class WeatherPresenter {
         return "NW";
       return "N";
     }
-    Scroller scroller;
+    TextScroller scroller;
 };
 

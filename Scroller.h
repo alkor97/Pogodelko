@@ -3,30 +3,49 @@
 
 #include "Display.h"
 
-class Scroller {
+class HorizontalScroller {
+  public:
+    void setup(uint8_t y = 0, int16_t screenWidth = 64) {
+      anchorX = 0;
+      anchorY = y;
+      screenWidth = screenWidth;
+    }
+
+    void show(Display& display) {
+      display.setCursor(anchorX, anchorY);
+      const int16_t contentWidth = render(display, anchorX, anchorY);
+      if (anchorX <= -contentWidth) {
+        anchorX = display.width();
+      } else {
+        --anchorX;
+      }
+    }
+
+  protected:
+    virtual int16_t render(Display& display, const int16_t x, const int16_t y) = 0;
+
+  private:
+    int16_t anchorX;
+    int16_t anchorY;
+    int16_t screenWidth;
+};
+
+class TextScroller : public HorizontalScroller {
   public:
     void setup(Display& display, uint8_t newY) {
-      position = display.width();
-      y = newY;
+      ((HorizontalScroller*) this)->setup((uint8_t)newY, display.width());
     }
 
     void setText(const String& newText) {
       text = newText;
     }
 
-    void show(Display& display) {
-      display.setCursor(position, y);
+    int16_t render(Display& display, const int16_t x, const int16_t y) {
+      display.setCursor(x, y);
       display.print(text);
-
-      if (position == -text.length() * 6) {
-        position = display.width();
-      } else {
-        --position;
-      }
+      return text.length() * 6;
     }
   private:
-    uint8_t y;
-    int position;
     String text;
 };
 

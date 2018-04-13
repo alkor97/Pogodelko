@@ -180,6 +180,6 @@ class AddressPresenter {
       scroller.show(display);
     }
   private:
-    Scroller scroller;
+    TextScroller scroller;
 };
 
