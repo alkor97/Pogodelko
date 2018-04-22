@@ -15,6 +15,7 @@ class Weather {
   public:
     Weather()
       : descriptionsCount(0)
+      , iconsCount(0)
       , temperature(0.0f)
       , humidity(0)
       , pressure(0)
@@ -40,6 +41,22 @@ class Weather {
     }
 
     uint8_t getDescriptionsCount() const {
+      return descriptionsCount;
+    }
+
+    bool addIcon(const String& icon) {
+      if (iconsCount < 5) {
+        icons[iconsCount++] = icon;
+        return true;
+      }
+      return false;
+    }
+
+    const String& getIcon(uint8_t index) const {
+      return icons[index];
+    }
+
+    uint8_t getIconsCount() const {
       return descriptionsCount;
     }
 
@@ -97,9 +114,48 @@ class Weather {
       cloudCoverage = v;
     }
 
+    String toString() const {
+      String r = "weather:";
+      r += " temp.: " + String(getTemperature(), 0) + "C";
+      r += " humd.: " + String(getHumidity()) + "%";
+      r += " pres.: " + String(getPressure()) + "hPa";
+      r += " wind: " + String(getWindDirection()) + " (" + toWindDirection(getWindDirection()) + ") " + String(getWindSpeed(), 0) + "km/h";
+      r += " clouds: " + String(getCloudCoverage()) + "%";
+      r += " desc.:";
+      for (int i = 0; i < getDescriptionsCount(); ++i) {
+        r += " " + getDescription(i);
+      }
+      for (int i = 0; i < getIconsCount(); ++i) {
+        r += " " + getIcon(i);
+      }
+      return r;
+    }
+
+    static String toWindDirection(int windDeg) {
+      if (windDeg < 22)
+        return "N";
+      if (windDeg < 45 + 22)
+        return "NE";
+      if (windDeg < 90 + 22)
+        return "E";
+      if (windDeg < 90 + 45 + 22)
+        return "SE";
+      if (windDeg < 180 + 22)
+        return "S";
+      if (windDeg < 180 + 45 + 22)
+        return "SW";
+      if (windDeg < 270 + 22)
+        return "W";
+      if (windDeg < 270 + 45 + 22)
+        return "NW";
+      return "N";
+    }
+
   private:
     String descriptions[5];
     uint8_t descriptionsCount;
+    String icons[5];
+    uint8_t iconsCount;
     float temperature; // in kelvins
     uint8_t humidity; // as percentage
     uint16_t pressure; // in hPa
@@ -157,8 +213,8 @@ class WeatherProvider : public QueryManager {
         if (root.success()) {
           weather.clear();
           for (int i = 0; i < root["weather"].size(); ++i) {
-            String w = root["weather"][i]["description"];
-            weather.addDescription(w);
+            weather.addDescription(root["weather"][i]["description"]);
+            weather.addIcon(root["weather"][i]["icon"]);
           }
 
           float temperature = root["main"]["temp"];
@@ -172,11 +228,14 @@ class WeatherProvider : public QueryManager {
 
           float windSpeed = root["wind"]["speed"];
           weather.setWindSpeed(windSpeed);
+
           int windDeg = root["wind"]["deg"];
           weather.setWindDirection(windDeg);
 
           int clouds = root["clouds"]["all"];
           weather.setCloudCoverage(clouds);
+
+          Serial.println(weather.toString());
 
           return true;
         } else {
