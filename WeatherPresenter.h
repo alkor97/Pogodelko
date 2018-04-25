@@ -390,7 +390,7 @@ class WeatherScroller : public HorizontalScroller {
 
       { // render icons
         for (uint8_t i = 0; i < weather.getIconsCount(); ++i) {
-          int16_t iconLength = renderWeatherIcon(display, weather.getIcon(i), x, y);
+          int16_t iconLength = renderWeatherIcon(display, weather.getIcon(i), x + length, y);
           if (!iconLength) {
             Serial.print("unknown icon ");
             Serial.println(weather.getIcon(i));
