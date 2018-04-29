@@ -110,13 +110,6 @@ class WeatherScroller : public HorizontalScroller {
         const int16_t start = x + length;
         length += render(display, weather.getPressure());
         {
-          display.drawBitmap(
-            start, y + 8,
-            symbols::arrows::CHANGES[tendencyIconIndex(weather.getPressureChange())],
-            ARROW_ICON_SIZE, ARROW_ICON_SIZE,
-            WHITE);
-        }
-        {
           static const String text = "hPa";
           display.setCursor(x + length - text.length() * CHAR_WIDTH, y + 8);
           display.setTextSize(1);
@@ -175,15 +168,6 @@ class WeatherScroller : public HorizontalScroller {
 
     uint16_t windIconIndex(int windDeg) {
       return ((windDeg + 22) / 45) % 8;
-    }
-
-    uint16_t tendencyIconIndex(int tendency) {
-      if (tendency < 0)
-        return 0; // SE
-      else if (tendency > 0)
-        return 1; // NE
-      else
-        return 2; // E
     }
 
     Weather weather;

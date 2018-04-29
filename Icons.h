@@ -95,40 +95,6 @@ const uint8_t NW[] PROGMEM = {
 const uint8_t* const DIRECTIONS[] = {
   N, NE, E, SE, S, SW, W, NW
 };
-
-const uint8_t FALL[] PROGMEM = {
-  B00000000,
-  B00000000,
-  B10000000,
-  B01010000,
-  B00110000,
-  B01110000,
-  B00000000,
-  B00000000
-};
-const uint8_t RISE[] PROGMEM = {
-  B00000000,
-  B00000000,
-  B01110000,
-  B00110000,
-  B01010000,
-  B10000000,
-  B00000000,
-  B00000000
-};
-const uint8_t KEEP[] PROGMEM = {
-  B00000000,
-  B01000000,
-  B00100000,
-  B11110000,
-  B00100000,
-  B01000000,
-  B00000000,
-  B00000000
-};
-const uint8_t* const CHANGES[] = {
-  FALL, RISE, KEEP
-};
 } // arrows namespace
 
 namespace icons {

@@ -19,7 +19,6 @@ class Weather {
       , temperature(0.0f)
       , humidity(0)
       , pressure(0)
-      , pressureChange(0)
       , windSpeed(0.0f)
       , windDirection(0)
       , cloudCoverage(0)
@@ -127,7 +126,7 @@ class Weather {
       String r = "weather:";
       r += " temp.: " + String(getTemperature(), 0) + "C";
       r += " humd.: " + String(getHumidity()) + "%";
-      r += " pres.: " + String(getPressure()) + "hPa," + getTendency(getPressureChange());
+      r += " pres.: " + String(getPressure()) + "hPa";
       r += " wind: " + String(getWindDirection()) + " (" + toWindDirection(getWindDirection()) + ") " + String(getWindSpeed(), 0) + "km/h";
       r += " clouds: " + String(getCloudCoverage()) + "%";
       r += " desc.:";
@@ -138,15 +137,6 @@ class Weather {
         r += " " + getIcon(i);
       }
       return r;
-    }
-
-    String getTendency(int v) const {
-      if (v < 0)
-        return "falling";
-      else if (v > 0)
-        return "rising";
-      else
-        return "stable";
     }
 
     static String toWindDirection(int windDeg) {
@@ -230,7 +220,6 @@ class WeatherProvider : public QueryManager {
         DynamicJsonBuffer jsonBuffer(bufferSize);
         JsonObject& root = jsonBuffer.parseObject(response);
         if (root.success()) {
-          const int prevPressure = weather.getPressure();
           weather.clear();
           for (int i = 0; i < root["weather"].size(); ++i) {
             weather.addDescription(root["weather"][i]["description"]);
@@ -242,7 +231,6 @@ class WeatherProvider : public QueryManager {
 
           int pressure = root["main"]["pressure"];
           weather.setPressure(pressure);
-          weather.setPressureChange(pressure - prevPressure);
 
           int humidity = root["main"]["humidity"];
           weather.setHumidity(humidity);
